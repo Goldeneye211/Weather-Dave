@@ -1,0 +1,42 @@
+channelID = 1230547
+
+%Inläsning av alla inregistrerade värden de senaste fem minutrarna
+lightData = thingSpeakRead(channelID, 'NumMinutes', 5, 'Fields', 1);
+tempData = thingSpeakRead(channelID, 'NumMinutes', 5, 'Fields', 2);
+moistData = thingSpeakRead(channelID, 'NumMinutes', 5, 'Fields', 3);
+windData = thingSpeakRead(channelID, 'NumMinutes', 5, 'Fields', 4);
+
+%Kalkylering av medelvärde
+avgLight = mean(lightData);
+avgTemp = mean(tempData);
+avgMoist = mean(moistData); 
+avgWind = mean(windData);
+
+%Formatbearbetning, avrundning, konvertering från flyttal till sträng 
+% och ändring från punkt till kommatecken, ljusstyrka
+asL = round(avgLight,1);
+aLdot = num2str(asL);
+aL = strrep(aLdot, '.', ',');
+
+%Formatbearbetning, avrundning, konvertering från flyttal till sträng 
+% och ändring från punkt till kommatecken, temperatur
+asT = round(avgTemp,1);
+aTdot = num2str(asT);
+aT = strrep(aTdot, '.', ',');
+
+%Konvertering till sträng, luftfuktighet
+aM = int2str(avgMoist);
+
+%Formatbearbetning, avrundning, konvertering från flyttal till sträng 
+% och ändring från punkt till kommatecken, vindhastighet
+asW = round(avgWind,1);
+aWdot = num2str(asW);
+aW = strrep(aWdot, '.', ',');
+
+%Sammanfogning av alla variabler i en sträng. Först skapas en lista
+% innehållandes variblerna som sedan sammanfogas i en gemensam sträng
+s = {aL,aT,aM,aW};
+b = strjoin(s,'|||');
+
+%Anrop av IFTTT på plats 1 med den summerade strängen
+webwrite('https://maker.ifttt.com/trigger/weather_data/with/key/G5g68FjBvUdzpMCQz9jxx','value1', b);
